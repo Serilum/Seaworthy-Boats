@@ -1,24 +1,33 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' } // mixin
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '[6.0,6.2)', changing: true
-        classpath 'org.spongepowered:mixingradle:0.7.+' // mixin
-    }
+plugins {
+    id 'idea'
+    id 'net.minecraftforge.gradle' version '6.0.24'
+    id 'org.spongepowered.mixin' version "0.7-SNAPSHOT" // mixin
 }
-apply plugin: 'java'
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'org.spongepowered.mixin' // mixin
 
-archivesBaseName = "${mod_name}-forge-${minecraft_version}"
+base {
+    archivesName = "${mod_name}-forge-${minecraft_version}"
+}
+
+mixin { // mixin
+    config 'seaworthyboats.mixins.json' // mixin
+
+    debug.verbose = true // mixin
+    debug.export = true // mixin
+} // mixin
 
 minecraft {
     mappings channel: 'official', version: minecraft_version
+
+    //mappings channel: "parchment", version: "1.20.3-2023.12.31-${minecraft_version}"
+
+    copyIdeResources = true //Calls processResources when in dev
+
+    // Automatically enable forge AccessTransformers if the file exists
+    // This location is hardcoded in Forge and can not be changed.
+    // https://github.com/MinecraftForge/MinecraftForge/blob/be1698bb1554f9c8fa2f58e32b9ab70bc4385e60/fmlloader/src/main/java/net/minecraftforge/fml/loading/moddiscovery/ModFile.java#L123
+    /*if (file('src/main/resources/META-INF/accesstransformer.cfg').exists()) {
+        accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    }*/
 
     runs {
         client {
@@ -27,12 +36,10 @@ minecraft {
 
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Client'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             mods {
                 modClientRun {
                     source sourceSets.main
-                    source project(":Common").sourceSets.main
+                    // source project(":Common").sourceSets.main
                 }
             }
         }
@@ -43,8 +50,6 @@ minecraft {
 
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName 'Server'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             mods {
                 modServerRun {
                     source sourceSets.main
@@ -60,8 +65,6 @@ minecraft {
             ideaModule "${rootProject.name}.${project.name}.main"
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
             taskName 'Data'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             mods {
                 modDataRun {
                     source sourceSets.main
@@ -76,47 +79,39 @@ sourceSets.main.resources.srcDir 'src/generated/resources'
 
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor' // mixin
-
     compileOnly project(":Common")
 
-    runtimeOnly fg.deobf("com.natamus.collective-ml:collective-forge:${minecraft_version}-${collective_version}")
-    compileOnly fg.deobf("com.natamus.collective-ml:collective-forge:${minecraft_version}-${collective_version}")
-    compileOnly fg.deobf("com.natamus.collective-ml:collective:${minecraft_version}-${collective_version}")
+    implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }
+
+    runtimeOnly "com.natamus.collective-ml:collective-forge:${minecraft_version}-${collective_version}"
+    compileOnly "com.natamus.collective-ml:collective-forge:${minecraft_version}-${collective_version}"
+    compileOnly "com.natamus.collective-ml:collective:${minecraft_version}-${collective_version}"
 }
 
-mixin { // mixin
-    add sourceSets.main, "seaworthyboats.refmap.json" // mixin
-    config 'seaworthyboats.mixins.json' // mixin
-    
-    debug.verbose = true // mixin
-    debug.export = true // mixin
-} // mixin
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy('include')
+}
 
-tasks.withType(JavaCompile) {
+tasks.named('compileJava', JavaCompile).configure {
     source(project(":Common").sourceSets.main.allSource)
 }
 
-processResources {
-    from project(":Common").sourceSets.main.resources
+sourceSets.each {
+    def dir = layout.buildDirectory.dir("sourcesSets/$it.name")
+    it.output.resourcesDir = dir
+    it.java.destinationDirectory = dir
 }
 
-jar.finalizedBy('reobfJar')
+//tasks.withType(Javadoc).configureEach {
+//    source(project(":Common").sourceSets.main.allJava)
+//}
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.version
-            artifact jar
-        }
-    }
-    repositories {
-        maven {
-            url "file://" + System.getenv("local_maven")
-        }
-    }
+//tasks.named("sourcesJar", Jar) {
+//    from(project(":Common").sourceSets.main.allSource)
+//}
+
+processResources {
+    from project(":Common").sourceSets.main.resources
 }
 
 repositories {
@@ -124,3 +119,13 @@ repositories {
         url = "https://maven.serilum.com/"
     }
 }
+
+jar {
+    manifest {
+        attributes([
+                "MixinConfigs" : "seaworthyboats.mixins.json" // mixin
+        ])
+    }
+}
+
+minecraft.reobf = false

@@ -8,7 +8,7 @@ logoFile="icon.png"
 modId="seaworthyboats"
 version="1.0"
 displayName="Seaworthy Boats"
-displayURL="https://serilum.com/mod/seaworthy-boats"
+displayURL="https://curseforge.com/minecraft/mc-mods/seaworthy-boats"
 authors="Rick South"
 description='''Reinforce boats into faster, tougher tiers from copper to netherite, and repair them with planks at a shipyard.
 '''
@@ -21,14 +21,17 @@ If you would like to contribute too, check out https://serilum.com/donate. Appre
 
 [[dependencies.seaworthyboats]]
     modId="collective"
-    mandatory=true
+    type="required"
     versionRange="[8.39,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.seaworthyboats]]
     modId="minecraft"
-    mandatory=true
+    type="required"
     versionRange="[1.21,1.21.1]"
     ordering="NONE"
     side="BOTH"
+
+[[mixins]]
+    config = "seaworthyboats.mixins.json"

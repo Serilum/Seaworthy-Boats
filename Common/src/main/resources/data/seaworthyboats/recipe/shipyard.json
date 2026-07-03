@@ -20,7 +20,7 @@
 		}
 	},
 	"result": {
-		"item": "seaworthyboats:shipyard",
+		"id": "seaworthyboats:shipyard",
 		"count": 1
 	}
 }

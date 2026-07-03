@@ -1,10 +1,12 @@
 plugins {
-    id 'fabric-loom' version '1.5-SNAPSHOT'
-    id 'maven-publish'
+    id 'fabric-loom' version '1.6-SNAPSHOT'
+    id 'java'
     id 'idea'
 }
 
-archivesBaseName = "${mod_name}-fabric-${minecraft_version}"
+base {
+    archivesName = "${mod_name}-fabric-${minecraft_version}"
+}
 
 repositories {
     maven { url "https://maven.terraformersmc.com/releases/" }
@@ -13,25 +15,32 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
-    mappings loom.officialMojangMappings()
+
+    //mappings loom.officialMojangMappings()
+    mappings loom.layered() {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-1.20.3:2023.12.31@zip")
+    }
+
     modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
-    implementation "org.jetbrains:annotations:23.0.0"
     implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
     implementation project(":Common")
 
-    modApi("com.terraformersmc:modmenu:7.0.1") { exclude(module: "fabric-api") }
+    modApi("com.terraformersmc:modmenu:11.0.0-beta.1") { exclude(module: "fabric-api") }
 
     modImplementation "com.natamus.collective-ml:collective-fabric:${minecraft_version}-${collective_version}"
     modCompileOnly "com.natamus.collective-ml:collective:${minecraft_version}-${collective_version}"
 }
 
 loom {
+    /*if (project(":Common").file("src/main/resources/${mod_id}.accesswidener").exists()) {
+        accessWidenerPath.set(project(":Common").file("src/main/resources/${mod_id}.accesswidener"))
+    }*/
     mixin {
         defaultRefmapName.set("${mod_id}_fabric.refmap.json")
     }
-
     runs {
         client {
             client()
@@ -48,39 +57,17 @@ loom {
     }
 }
 
+//tasks.named('compileJava', JavaCompile).configure {
+tasks.withType(JavaCompile).configureEach {
+    source(project(":Common").sourceSets.main.allSource)
+}
+//tasks.withType(Javadoc).configureEach {
+//    source(project(":Common").sourceSets.main.allJava)
+//}
+//tasks.named("sourcesJar", Jar) {
+//    from(project(":Common").sourceSets.main.allSource)
+//}
 
 processResources {
     from project(":Common").sourceSets.main.resources
-    inputs.property "version", project.version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
-}
-
-tasks.withType(JavaCompile) {
-    source(project(":Common").sourceSets.main.allSource)
-}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_${mod_name}" }
-    }
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.version
-            from components.java
-        }
-    }
-
-    repositories {
-        maven {
-            url "file://" + System.getenv("local_maven")
-        }
-    }
 }

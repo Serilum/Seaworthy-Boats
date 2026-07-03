@@ -12,7 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -54,9 +54,9 @@ public class ShipyardFunctions {
 		return (int)Math.ceil(damage / ConfigHandler.healthPerPlank);
 	}
 
-	public static InteractionResult toggle(Level level, BlockPos pos, BlockState state, Player player) {
+	public static ItemInteractionResult toggle(Level level, BlockPos pos, BlockState state, Player player) {
 		if (level.isClientSide()) {
-			return InteractionResult.SUCCESS;
+			return ItemInteractionResult.SUCCESS;
 		}
 
 		ShipyardMode next = ShipyardMode.UPGRADE;
@@ -78,10 +78,10 @@ public class ShipyardFunctions {
 			player.displayClientMessage(Component.translatable("collective.seaworthyboats.message.mode.repair").withStyle(ChatFormatting.AQUA), true);
 		}
 
-		return InteractionResult.SUCCESS;
+		return ItemInteractionResult.SUCCESS;
 	}
 
-	public static InteractionResult tryAction(Level level, BlockPos pos, BlockState state, Player player, ItemStack stack) {
+	public static ItemInteractionResult tryAction(Level level, BlockPos pos, BlockState state, Player player, ItemStack stack) {
 		if (stack.getItem() instanceof BoatItem && BoatTier.getDamageFromStack(stack) > 0.0F) {
 			return repairItem(level, pos, player, stack);
 		}
@@ -93,24 +93,24 @@ public class ShipyardFunctions {
 		}
 
 		if (boat == null) {
-			return InteractionResult.PASS;
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		}
 
 		boolean upgraded = BoatFunctions.tryReinforce(boat, player, stack);
 		if (upgraded) {
-			return InteractionResult.SUCCESS;
+			return ItemInteractionResult.SUCCESS;
 		}
 
-		return InteractionResult.PASS;
+		return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 	}
 
-	private static InteractionResult repair(Level level, Boat boat, Player player, ItemStack stack) {
+	private static ItemInteractionResult repair(Level level, Boat boat, Player player, ItemStack stack) {
 		if (!stack.is(ItemTags.PLANKS)) {
-			return InteractionResult.PASS;
+			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 		}
 
 		if (boat == null || boat.getDamage() <= 0.0F) {
-			return InteractionResult.SUCCESS;
+			return ItemInteractionResult.SUCCESS;
 		}
 
 		if (!level.isClientSide()) {
@@ -132,10 +132,10 @@ public class ShipyardFunctions {
 			BoatFunctions.playWorkEffects(level, boat.getX(), boat.getY() + 0.5, boat.getZ());
 		}
 
-		return InteractionResult.SUCCESS;
+		return ItemInteractionResult.SUCCESS;
 	}
 
-	private static InteractionResult repairItem(Level level, BlockPos pos, Player player, ItemStack stack) {
+	private static ItemInteractionResult repairItem(Level level, BlockPos pos, Player player, ItemStack stack) {
 		if (!level.isClientSide()) {
 			float damage = BoatTier.getDamageFromStack(stack);
 			int needed = (int)Math.ceil(damage / ConfigHandler.healthPerPlank);
@@ -148,7 +148,7 @@ public class ShipyardFunctions {
 
 			if (available <= 0) {
 				MessageFunctions.sendMessage(player, Component.translatable("collective.seaworthyboats.message.needplanks", needed).withStyle(ChatFormatting.RED));
-				return InteractionResult.SUCCESS;
+				return ItemInteractionResult.SUCCESS;
 			}
 
 			float healed = available * (float)ConfigHandler.healthPerPlank;
@@ -164,7 +164,7 @@ public class ShipyardFunctions {
 			BoatFunctions.playWorkEffects(level, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5);
 		}
 
-		return InteractionResult.SUCCESS;
+		return ItemInteractionResult.SUCCESS;
 	}
 
 	private static int consumePlanks(Player player, int needed) {

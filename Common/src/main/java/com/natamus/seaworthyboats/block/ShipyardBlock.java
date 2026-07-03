@@ -3,8 +3,8 @@ package com.natamus.seaworthyboats.block;
 import com.natamus.seaworthyboats.functions.ShipyardFunctions;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -29,8 +29,7 @@ public class ShipyardBlock extends Block {
 	}
 
 	@Override
-	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-		ItemStack itemStack = player.getItemInHand(hand);
+	protected ItemInteractionResult useItemOn(ItemStack itemStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
 		if (player.isShiftKeyDown()) {
 			return ShipyardFunctions.toggle(level, pos, state, player);
 		}

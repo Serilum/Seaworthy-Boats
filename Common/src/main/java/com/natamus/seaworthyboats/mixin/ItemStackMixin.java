@@ -3,7 +3,6 @@ package com.natamus.seaworthyboats.mixin;
 import com.natamus.seaworthyboats.data.BoatTier;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextColor;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.ItemStack;
 
@@ -27,7 +26,7 @@ public class ItemStackMixin {
 			return;
 		}
 
-		Component name = Component.translatable("collective.seaworthyboats.reinforcedboat", BoatTier.getTierName(tier), cir.getReturnValue()).withStyle(style -> style.withColor(TextColor.fromRgb(BoatTier.getTierTextColor(tier) & 0xFFFFFF)));
+		Component name = Component.translatable("collective.seaworthyboats.reinforcedboat", BoatTier.getTierName(tier), cir.getReturnValue()).withColor(BoatTier.getTierTextColor(tier) & 0xFFFFFF);
 
 		cir.setReturnValue(name);
 	}

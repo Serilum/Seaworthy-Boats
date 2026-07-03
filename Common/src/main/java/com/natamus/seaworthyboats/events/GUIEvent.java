@@ -8,12 +8,12 @@ import com.natamus.seaworthyboats.data.BoatTier;
 import com.natamus.seaworthyboats.data.ClientConstants;
 import com.natamus.seaworthyboats.functions.ShipyardFunctions;
 
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
@@ -27,9 +27,8 @@ import java.util.List;
 
 public class GUIEvent {
 	private static final Minecraft mc = Minecraft.getInstance();
-	private static final ResourceLocation GUI_ICONS_LOCATION = new ResourceLocation("textures/gui/icons.png");
 
-	public static void renderOverlay(GuiGraphics guiGraphics) {
+	public static void renderOverlay(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
 		ClientConstants.highlightedBoat = null;
 
 		if (GUIFunctions.shouldHideGUI()) {
@@ -72,13 +71,13 @@ public class GUIEvent {
 
 			for (int i = 0; i < rowHearts; i++) {
 				int xo = xRight - i * 8 - 9;
-				guiGraphics.blit(GUI_ICONS_LOCATION, xo, yo, 52, 9, 9, 9);
+				guiGraphics.blitSprite(ClientConstants.HEART_VEHICLE_CONTAINER_SPRITE, xo, yo, 9, 9);
 				if (i * 2 + 1 + baseHealth < currentHealth) {
-					guiGraphics.blit(GUI_ICONS_LOCATION, xo, yo, 88, 9, 9, 9);
+					guiGraphics.blitSprite(ClientConstants.HEART_VEHICLE_FULL_SPRITE, xo, yo, 9, 9);
 				}
 
 				if (i * 2 + 1 + baseHealth == currentHealth) {
-					guiGraphics.blit(GUI_ICONS_LOCATION, xo, yo, 97, 9, 9, 9);
+					guiGraphics.blitSprite(ClientConstants.HEART_VEHICLE_HALF_SPRITE, xo, yo, 9, 9);
 				}
 			}
 
@@ -97,12 +96,14 @@ public class GUIEvent {
 			int armourY = guiGraphics.guiHeight() - 49;
 			for (int i = 0; i < 10; i++) {
 				int xo = xRight - i * 8 - 9;
-				guiGraphics.blit(GUI_ICONS_LOCATION, xo, armourY, 16, 9, 9, 9);
+				guiGraphics.blitSprite(ClientConstants.ARMOR_EMPTY_SPRITE, xo, armourY, 9, 9);
 				if (i * 2 + 1 < armourHalves) {
-					guiGraphics.blit(GUI_ICONS_LOCATION, xo, armourY, 34, 9, 9, 9);
+					guiGraphics.blitSprite(ClientConstants.ARMOR_FULL_SPRITE, xo, armourY, 9, 9);
 				}
 				else if (i * 2 + 1 == armourHalves) {
-					guiGraphics.blit(GUI_ICONS_LOCATION, xo, armourY, 25, 9, 9, 9);
+					guiGraphics.enableScissor(xo + 4, armourY, xo + 9, armourY + 9);
+					guiGraphics.blitSprite(ClientConstants.ARMOR_FULL_SPRITE, xo, armourY, 9, 9);
+					guiGraphics.disableScissor();
 				}
 			}
 		}

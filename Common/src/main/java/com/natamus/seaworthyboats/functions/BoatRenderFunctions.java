@@ -51,12 +51,12 @@ public class BoatRenderFunctions {
 		for (Direction dir : Direction.values()) {
 			random.setSeed(42L);
 			for (BakedQuad quad : trimModel.getQuads(null, dir, random)) {
-				buffer.putBulkData(pose, quad, r, g, b, light, overlay);
+				buffer.putBulkData(pose, quad, r, g, b, 1.0F, light, overlay);
 			}
 		}
 		random.setSeed(42L);
 		for (BakedQuad quad : trimModel.getQuads(null, null, random)) {
-			buffer.putBulkData(pose, quad, r, g, b, light, overlay);
+			buffer.putBulkData(pose, quad, r, g, b, 1.0F, light, overlay);
 		}
 
 		poseStack.popPose();
@@ -170,6 +170,6 @@ public class BoatRenderFunctions {
 	}
 
 	private static void vertex(PoseStack.Pose pose, VertexConsumer buffer, int color, int light, float x, float y, float z) {
-		buffer.vertex(pose.pose(), x, y, z).color(color).uv2(light).endVertex();
+		buffer.addVertex(pose, x, y, z).setColor(color).setLight(light);
 	}
 }

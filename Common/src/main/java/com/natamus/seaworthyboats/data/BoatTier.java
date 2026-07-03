@@ -3,7 +3,7 @@ package com.natamus.seaworthyboats.data;
 import com.natamus.collective.services.Services;
 import com.natamus.seaworthyboats.config.ConfigHandler;
 import com.natamus.seaworthyboats.util.Reference;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -11,9 +11,10 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 
 public class BoatTier {
-	public static final ResourceLocation BOAT_TIER = new ResourceLocation(Reference.MOD_ID, "tier");
+	public static final ResourceLocation BOAT_TIER = ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, "tier");
 	public static final int HIGHEST_TIER = 5;
 
 	public static int getTier(Boat boat) {
@@ -25,34 +26,25 @@ public class BoatTier {
 	}
 
 	public static void saveTierToStack(ItemStack stack, int tier) {
-		stack.getOrCreateTag().putInt("seaworthyboats_tier", tier);
+		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putInt("seaworthyboats_tier", tier));
 	}
 
 	public static int getTierFromStack(ItemStack stack) {
-		CompoundTag tag = stack.getTag();
-		if (tag == null) {
-			return 0;
-		}
-		return tag.getInt("seaworthyboats_tier");
+		CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+		return data.copyTag().getInt("seaworthyboats_tier");
 	}
 
 	public static void saveDamageToStack(ItemStack stack, float damage) {
-		stack.getOrCreateTag().putFloat("seaworthyboats_damage", damage);
+		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putFloat("seaworthyboats_damage", damage));
 	}
 
 	public static float getDamageFromStack(ItemStack stack) {
-		CompoundTag tag = stack.getTag();
-		if (tag == null) {
-			return 0.0F;
-		}
-		return tag.getFloat("seaworthyboats_damage");
+		CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
+		return data.copyTag().getFloat("seaworthyboats_damage");
 	}
 
 	public static void clearDamageFromStack(ItemStack stack) {
-		CompoundTag tag = stack.getTag();
-		if (tag != null) {
-			tag.remove("seaworthyboats_damage");
-		}
+		CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.remove("seaworthyboats_damage"));
 	}
 
 	public static boolean isStackBroken(ItemStack stack) {
