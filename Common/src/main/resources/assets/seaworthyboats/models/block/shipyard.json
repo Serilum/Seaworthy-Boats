@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "minecraft:block/dark_oak_planks",
+    "up": "seaworthyboats:block/shipyard_top",
+    "north": "seaworthyboats:block/shipyard_side3",
+    "east": "seaworthyboats:block/shipyard_side3",
+    "south": "seaworthyboats:block/shipyard_side1",
+    "west": "seaworthyboats:block/shipyard_side2",
+    "particle": "seaworthyboats:block/shipyard_side3"
+  }
+}

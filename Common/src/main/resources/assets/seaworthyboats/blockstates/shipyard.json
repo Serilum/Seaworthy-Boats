@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "mode=repair": { "model": "seaworthyboats:block/shipyard" },
+    "mode=upgrade": { "model": "seaworthyboats:block/shipyard" }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.natamus.seaworthyboats.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "BoatItemMixin",
+    "BoatMixin",
+    "ChestBoatMixin",
+    "ItemBarMixin",
+    "ItemStackMixin"
+  ],
+  "client": [
+    "BoatModelMixin",
+    "BoatRendererMixin",
+    "GuiMixin",
+    "ItemRendererMixin",
+	  "MinecraftMixin"
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

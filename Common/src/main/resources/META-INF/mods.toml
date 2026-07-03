@@ -1,0 +1,36 @@
+modLoader="javafml"
+loaderVersion="*"
+license="All rights reserved"
+issueTrackerURL="https://github.com/Serilum/.issue-tracker/labels/Mod:%20Seaworthy%20Boats"
+logoFile="icon.png"
+
+[[mods]]
+modId="seaworthyboats"
+version="1.0"
+displayName="Seaworthy Boats"
+displayURL="https://serilum.com/mod/seaworthy-boats"
+authors="Rick South"
+description='''Reinforce boats into faster, tougher tiers from copper to netherite, and repair them with planks at a shipyard.
+'''
+credits='''Thank you very much to my Membership sponsors for supporting the development of this mod:  
+
+Andrean Olgo, AnyankaT, aternosorg, Cherriesaurus, Josh, Linda Jansen, MWS, Tyler Behl   
+
+If you would like to contribute too, check out https://serilum.com/donate. Appreciate it! <3   
+'''
+
+[[dependencies.seaworthyboats]]
+    modId="collective"
+    type="required"
+    mandatory=true
+    versionRange="[8.39,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.seaworthyboats]]
+    modId="minecraft"
+    type="required"
+    mandatory=true
+    versionRange="[1.20.1]"
+    ordering="NONE"
+    side="BOTH"
