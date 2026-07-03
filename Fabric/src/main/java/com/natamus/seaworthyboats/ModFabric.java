@@ -6,7 +6,7 @@ import com.natamus.seaworthyboats.util.Reference;
 import net.fabricmc.api.ModInitializer;
 
 public class ModFabric implements ModInitializer {
-
+	
 	@Override
 	public void onInitialize() {
 		if (!ShouldLoadCheck.shouldLoad(Reference.MOD_ID)) {
@@ -15,6 +15,7 @@ public class ModFabric implements ModInitializer {
 
 		setGlobalConstants();
 		ModCommon.init();
+
 		ModCommon.registerAssets(null);
 		ModCommon.setAssets();
 

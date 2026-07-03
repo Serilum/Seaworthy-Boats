@@ -6,22 +6,22 @@ import com.natamus.seaworthyboats.util.Reference;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 
 public class BoatTier {
-	public static final ResourceLocation BOAT_TIER = ResourceLocation.fromNamespaceAndPath(Reference.MOD_ID, "tier");
+	public static final Identifier BOAT_TIER = Identifier.fromNamespaceAndPath(Reference.MOD_ID, "tier");
 	public static final int HIGHEST_TIER = 5;
 
-	public static int getTier(Boat boat) {
+	public static int getTier(AbstractBoat boat) {
 		return Services.ENTITYDATA.getInt(boat, BOAT_TIER, 0);
 	}
 
-	public static void setTier(Boat boat, int tier) {
+	public static void setTier(AbstractBoat boat, int tier) {
 		Services.ENTITYDATA.setInt(boat, BOAT_TIER, tier);
 	}
 
@@ -31,7 +31,7 @@ public class BoatTier {
 
 	public static int getTierFromStack(ItemStack stack) {
 		CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
-		return data.copyTag().getInt("seaworthyboats_tier");
+		return data.copyTag().getIntOr("seaworthyboats_tier", 0);
 	}
 
 	public static void saveDamageToStack(ItemStack stack, float damage) {
@@ -40,7 +40,7 @@ public class BoatTier {
 
 	public static float getDamageFromStack(ItemStack stack) {
 		CustomData data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY);
-		return data.copyTag().getFloat("seaworthyboats_damage");
+		return data.copyTag().getFloatOr("seaworthyboats_damage", 0.0F);
 	}
 
 	public static void clearDamageFromStack(ItemStack stack) {

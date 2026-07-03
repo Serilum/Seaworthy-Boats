@@ -2,12 +2,10 @@ package com.natamus.seaworthyboats.mixin;
 
 import com.natamus.seaworthyboats.config.ConfigHandler;
 import com.natamus.seaworthyboats.data.BoatTier;
-
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;

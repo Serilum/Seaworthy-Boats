@@ -1,6 +1,8 @@
 {
     "pack": {
         "description": "seaworthyboats resources",
-        "pack_format": 48
+        "pack_format": 107.1,
+        "min_format": 107.1,
+        "max_format": 107.1
     }
 }

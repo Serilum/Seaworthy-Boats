@@ -8,14 +8,14 @@ import com.natamus.seaworthyboats.data.BoatTier;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.ItemInteractionResult;
-import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -27,14 +27,14 @@ import java.util.List;
 
 public class ShipyardFunctions {
 
-	public static Boat getDockedBoat(Level level, BlockPos pos) {
+	public static AbstractBoat getDockedBoat(Level level, BlockPos pos) {
 		AABB area = new AABB(pos).inflate(ConfigHandler.shipyardRange);
-		List<Boat> boats = level.getEntitiesOfClass(Boat.class, area);
+		List<AbstractBoat> boats = level.getEntitiesOfClass(AbstractBoat.class, area);
 
-		Boat nearest = null;
+		AbstractBoat nearest = null;
 		double nearestDistance = Double.MAX_VALUE;
 		Vec3 center = Vec3.atCenterOf(pos);
-		for (Boat boat : boats) {
+		for (AbstractBoat boat : boats) {
 			double distance = boat.position().distanceToSqr(center);
 			if (distance < nearestDistance) {
 				nearestDistance = distance;
@@ -45,7 +45,7 @@ public class ShipyardFunctions {
 		return nearest;
 	}
 
-	public static int getRepairCost(Boat boat) {
+	public static int getRepairCost(AbstractBoat boat) {
 		float damage = boat.getDamage();
 		if (damage <= 0.0F) {
 			return 0;
@@ -54,9 +54,9 @@ public class ShipyardFunctions {
 		return (int)Math.ceil(damage / ConfigHandler.healthPerPlank);
 	}
 
-	public static ItemInteractionResult toggle(Level level, BlockPos pos, BlockState state, Player player) {
+	public static InteractionResult toggle(Level level, BlockPos pos, BlockState state, Player player) {
 		if (level.isClientSide()) {
-			return ItemInteractionResult.SUCCESS;
+			return InteractionResult.SUCCESS;
 		}
 
 		ShipyardMode next = ShipyardMode.UPGRADE;
@@ -72,45 +72,45 @@ public class ShipyardFunctions {
 
 		level.playSound(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.4F, pitch);
 		if (next == ShipyardMode.UPGRADE) {
-			player.displayClientMessage(Component.translatable("collective.seaworthyboats.message.mode.upgrade").withStyle(ChatFormatting.AQUA), true);
+			player.sendOverlayMessage(Component.translatable("collective.seaworthyboats.message.mode.upgrade").withStyle(ChatFormatting.AQUA));
 		}
 		else {
-			player.displayClientMessage(Component.translatable("collective.seaworthyboats.message.mode.repair").withStyle(ChatFormatting.AQUA), true);
+			player.sendOverlayMessage(Component.translatable("collective.seaworthyboats.message.mode.repair").withStyle(ChatFormatting.AQUA));
 		}
 
-		return ItemInteractionResult.SUCCESS;
+		return InteractionResult.SUCCESS;
 	}
 
-	public static ItemInteractionResult tryAction(Level level, BlockPos pos, BlockState state, Player player, ItemStack stack) {
+	public static InteractionResult tryAction(Level level, BlockPos pos, BlockState state, Player player, ItemStack stack) {
 		if (stack.getItem() instanceof BoatItem && BoatTier.getDamageFromStack(stack) > 0.0F) {
 			return repairItem(level, pos, player, stack);
 		}
 
-		Boat boat = getDockedBoat(level, pos);
+		AbstractBoat boat = getDockedBoat(level, pos);
 
 		if (state.getValue(ShipyardBlock.MODE) == ShipyardMode.REPAIR) {
 			return repair(level, boat, player, stack);
 		}
 
 		if (boat == null) {
-			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+			return InteractionResult.PASS;
 		}
 
 		boolean upgraded = BoatFunctions.tryReinforce(boat, player, stack);
 		if (upgraded) {
-			return ItemInteractionResult.SUCCESS;
+			return InteractionResult.SUCCESS;
 		}
 
-		return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+		return InteractionResult.PASS;
 	}
 
-	private static ItemInteractionResult repair(Level level, Boat boat, Player player, ItemStack stack) {
+	private static InteractionResult repair(Level level, AbstractBoat boat, Player player, ItemStack stack) {
 		if (!stack.is(ItemTags.PLANKS)) {
-			return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+			return InteractionResult.PASS;
 		}
 
 		if (boat == null || boat.getDamage() <= 0.0F) {
-			return ItemInteractionResult.SUCCESS;
+			return InteractionResult.SUCCESS;
 		}
 
 		if (!level.isClientSide()) {
@@ -132,10 +132,10 @@ public class ShipyardFunctions {
 			BoatFunctions.playWorkEffects(level, boat.getX(), boat.getY() + 0.5, boat.getZ());
 		}
 
-		return ItemInteractionResult.SUCCESS;
+		return InteractionResult.SUCCESS;
 	}
 
-	private static ItemInteractionResult repairItem(Level level, BlockPos pos, Player player, ItemStack stack) {
+	private static InteractionResult repairItem(Level level, BlockPos pos, Player player, ItemStack stack) {
 		if (!level.isClientSide()) {
 			float damage = BoatTier.getDamageFromStack(stack);
 			int needed = (int)Math.ceil(damage / ConfigHandler.healthPerPlank);
@@ -148,7 +148,7 @@ public class ShipyardFunctions {
 
 			if (available <= 0) {
 				MessageFunctions.sendMessage(player, Component.translatable("collective.seaworthyboats.message.needplanks", needed).withStyle(ChatFormatting.RED));
-				return ItemInteractionResult.SUCCESS;
+				return InteractionResult.SUCCESS;
 			}
 
 			float healed = available * (float)ConfigHandler.healthPerPlank;
@@ -164,14 +164,14 @@ public class ShipyardFunctions {
 			BoatFunctions.playWorkEffects(level, pos.getX() + 0.5, pos.getY() + 1.0, pos.getZ() + 0.5);
 		}
 
-		return ItemInteractionResult.SUCCESS;
+		return InteractionResult.SUCCESS;
 	}
 
 	private static int consumePlanks(Player player, int needed) {
 		int consumed = 0;
-		Inventory inventory = player.getInventory();
-		for (int slot = 0; slot < inventory.getContainerSize() && consumed < needed; slot++) {
-			ItemStack inv = inventory.getItem(slot);
+		NonNullList<ItemStack> items = player.getInventory().getNonEquipmentItems();
+		for (int slot = 0; slot < items.size() && consumed < needed; slot++) {
+			ItemStack inv = items.get(slot);
 			if (!inv.is(ItemTags.PLANKS)) {
 				continue;
 			}

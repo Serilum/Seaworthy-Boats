@@ -1,73 +1,65 @@
 plugins {
-    id 'fabric-loom' version '1.6-SNAPSHOT'
-    id 'java'
-    id 'idea'
-}
-
-base {
-    archivesName = "${mod_name}-fabric-${minecraft_version}"
+    id 'multiloader-loader'
+    id 'net.fabricmc.fabric-loom'
 }
 
 repositories {
-    maven { url "https://maven.terraformersmc.com/releases/" }
     maven { url "https://maven.serilum.com/" }
+    maven { url "https://maven.terraformersmc.com/releases/" }
+    maven { url "https://maven.nucleoid.xyz/" }
 }
 
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
 
-    //mappings loom.officialMojangMappings()
-    mappings loom.layered() {
-        officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-1.20.3:2023.12.31@zip")
-    }
+    implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
+    implementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
 
-    modImplementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
+    api("com.terraformersmc:modmenu:20.0.0-beta.2") { exclude(module: "fabric-api") }
 
-    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.1'
-    implementation project(":Common")
-
-    modApi("com.terraformersmc:modmenu:11.0.0-beta.1") { exclude(module: "fabric-api") }
-
-    modImplementation "com.natamus.collective-ml:collective-fabric:${minecraft_version}-${collective_version}"
-    modCompileOnly "com.natamus.collective-ml:collective:${minecraft_version}-${collective_version}"
+    implementation "com.natamus.collective-ml:collective-fabric:${minecraft_display_version}-${collective_version}"
+    compileOnly "com.natamus.collective-ml:collective:${minecraft_display_version}-${collective_version}"
 }
 
 loom {
-    /*if (project(":Common").file("src/main/resources/${mod_id}.accesswidener").exists()) {
-        accessWidenerPath.set(project(":Common").file("src/main/resources/${mod_id}.accesswidener"))
-    }*/
-    mixin {
-        defaultRefmapName.set("${mod_id}_fabric.refmap.json")
+    def aw = project(':Common').file("src/main/resources/${mod_id}.accesswidener")
+    if (aw.exists()) {
+        accessWidenerPath.set(aw)
     }
+    // mixin {
+    //    defaultRefmapName.set("${mod_id}.refmap.json")
+    // }
     runs {
         client {
             client()
-            setConfigName("Fabric Client")
+            setConfigName('Fabric Client')
             ideConfigGenerated(true)
-            runDir("run")
+            runDir('runs/client')
         }
         server {
             server()
-            setConfigName("Fabric Server")
+            setConfigName('Fabric Server')
             ideConfigGenerated(true)
-            runDir("run")
+            runDir('runs/server')
         }
     }
 }
 
-//tasks.named('compileJava', JavaCompile).configure {
-tasks.withType(JavaCompile).configureEach {
-    source(project(":Common").sourceSets.main.allSource)
+// Implement mcgradleconventions loader attribute
+def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
+['apiElements', 'runtimeElements', 'includeInternal', 'modCompileClasspath'].each { variant -> // , 'sourcesElements', 'javadocElements', 'includeInternal', 'modCompileClasspath'].each { variant ->
+    configurations.named("$variant") {
+        attributes {
+            attribute(loaderAttribute, 'fabric')
+        }
+    }
 }
-//tasks.withType(Javadoc).configureEach {
-//    source(project(":Common").sourceSets.main.allJava)
-//}
-//tasks.named("sourcesJar", Jar) {
-//    from(project(":Common").sourceSets.main.allSource)
-//}
-
-processResources {
-    from project(":Common").sourceSets.main.resources
+sourceSets.configureEach {
+    [it.compileClasspathConfigurationName, it.runtimeClasspathConfigurationName].each { variant->
+        configurations.named("$variant") {
+            attributes {
+                attribute(loaderAttribute, 'fabric')
+            }
+        }
+    }
 }

@@ -1,11 +1,9 @@
 package com.natamus.seaworthyboats.mixin;
 
 import com.natamus.seaworthyboats.data.BoatTier;
-
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.ItemStack;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

@@ -10,12 +10,13 @@ import com.natamus.seaworthyboats.functions.ShipyardFunctions;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -28,7 +29,7 @@ import java.util.List;
 public class GUIEvent {
 	private static final Minecraft mc = Minecraft.getInstance();
 
-	public static void renderOverlay(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
+	public static void renderOverlay(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker) {
 		ClientConstants.highlightedBoat = null;
 
 		if (GUIFunctions.shouldHideGUI()) {
@@ -47,7 +48,7 @@ public class GUIEvent {
 		}
 
 		Entity vehicle = player.getVehicle();
-		if (!(vehicle instanceof Boat boat)) {
+		if (!(vehicle instanceof AbstractBoat boat)) {
 			return;
 		}
 
@@ -71,13 +72,13 @@ public class GUIEvent {
 
 			for (int i = 0; i < rowHearts; i++) {
 				int xo = xRight - i * 8 - 9;
-				guiGraphics.blitSprite(ClientConstants.HEART_VEHICLE_CONTAINER_SPRITE, xo, yo, 9, 9);
+				guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, ClientConstants.HEART_VEHICLE_CONTAINER_SPRITE, xo, yo, 9, 9);
 				if (i * 2 + 1 + baseHealth < currentHealth) {
-					guiGraphics.blitSprite(ClientConstants.HEART_VEHICLE_FULL_SPRITE, xo, yo, 9, 9);
+					guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, ClientConstants.HEART_VEHICLE_FULL_SPRITE, xo, yo, 9, 9);
 				}
 
 				if (i * 2 + 1 + baseHealth == currentHealth) {
-					guiGraphics.blitSprite(ClientConstants.HEART_VEHICLE_HALF_SPRITE, xo, yo, 9, 9);
+					guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, ClientConstants.HEART_VEHICLE_HALF_SPRITE, xo, yo, 9, 9);
 				}
 			}
 
@@ -96,20 +97,21 @@ public class GUIEvent {
 			int armourY = guiGraphics.guiHeight() - 49;
 			for (int i = 0; i < 10; i++) {
 				int xo = xRight - i * 8 - 9;
-				guiGraphics.blitSprite(ClientConstants.ARMOR_EMPTY_SPRITE, xo, armourY, 9, 9);
+				guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, ClientConstants.ARMOR_EMPTY_SPRITE, xo, armourY, 9, 9);
 				if (i * 2 + 1 < armourHalves) {
-					guiGraphics.blitSprite(ClientConstants.ARMOR_FULL_SPRITE, xo, armourY, 9, 9);
+					guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, ClientConstants.ARMOR_FULL_SPRITE, xo, armourY, 9, 9);
 				}
 				else if (i * 2 + 1 == armourHalves) {
+					// Fill half plate on its right edge
 					guiGraphics.enableScissor(xo + 4, armourY, xo + 9, armourY + 9);
-					guiGraphics.blitSprite(ClientConstants.ARMOR_FULL_SPRITE, xo, armourY, 9, 9);
+					guiGraphics.blitSprite(RenderPipelines.GUI_TEXTURED, ClientConstants.ARMOR_FULL_SPRITE, xo, armourY, 9, 9);
 					guiGraphics.disableScissor();
 				}
 			}
 		}
 	}
 
-	private static void renderShipyardInfo(GuiGraphics guiGraphics, LocalPlayer player) {
+	private static void renderShipyardInfo(GuiGraphicsExtractor guiGraphics, LocalPlayer player) {
 		HitResult hit = mc.hitResult;
 		if (hit == null || hit.getType() != HitResult.Type.BLOCK) {
 			return;
@@ -123,7 +125,7 @@ public class GUIEvent {
 		}
 
 		ShipyardMode mode = state.getValue(ShipyardBlock.MODE);
-		Boat boat = ShipyardFunctions.getDockedBoat(level, pos);
+		AbstractBoat boat = ShipyardFunctions.getDockedBoat(level, pos);
 		ClientConstants.highlightedBoat = boat;
 
 		List<Component> lines = new ArrayList<>();
@@ -153,7 +155,7 @@ public class GUIEvent {
 		drawTextBox(guiGraphics, lines, colors, Component.translatable("collective.seaworthyboats.shipyard.switchhint").withStyle(style -> style.withItalic(true)));
 	}
 
-	private static void drawTextBox(GuiGraphics guiGraphics, List<Component> lines, List<Integer> colors, Component hint) {
+	private static void drawTextBox(GuiGraphicsExtractor guiGraphics, List<Component> lines, List<Integer> colors, Component hint) {
 		int padding = 7;
 		int lineHeight = 12;
 
@@ -196,19 +198,19 @@ public class GUIEvent {
 		int textY = top + padding;
 		for (int i = 0; i < lines.size(); i++) {
 			float scale = (i == 0) ? 1.0F : 0.8F;
-			guiGraphics.pose().pushPose();
-			guiGraphics.pose().translate(centerX, textY, 0.0);
-			guiGraphics.pose().scale(scale, scale, 1.0F);
-			guiGraphics.drawCenteredString(mc.font, lines.get(i), 0, 0, colors.get(i));
-			guiGraphics.pose().popPose();
+			guiGraphics.pose().pushMatrix();
+			guiGraphics.pose().translate(centerX, textY);
+			guiGraphics.pose().scale(scale, scale);
+			guiGraphics.centeredText(mc.font, lines.get(i), 0, 0, colors.get(i));
+			guiGraphics.pose().popMatrix();
 			textY += (i == 0) ? lineHeight : lineHeight - 2;
 		}
 
-		guiGraphics.pose().pushPose();
-		guiGraphics.pose().translate(centerX, textY, 0.0);
-		guiGraphics.pose().scale(0.6F, 0.6F, 1.0F);
-		guiGraphics.drawCenteredString(mc.font, hint, 0, 0, 0xFF808080);
-		guiGraphics.pose().popPose();
+		guiGraphics.pose().pushMatrix();
+		guiGraphics.pose().translate(centerX, textY);
+		guiGraphics.pose().scale(0.6F, 0.6F);
+		guiGraphics.centeredText(mc.font, hint, 0, 0, 0xFF808080);
+		guiGraphics.pose().popMatrix();
 	}
 
 	private static int modeColor(ShipyardMode mode) {
@@ -219,12 +221,12 @@ public class GUIEvent {
 		return 0xFF7FE08A;
 	}
 
-	private static Component boatName(Boat boat) {
+	private static Component boatName(AbstractBoat boat) {
 		// getHoverName() already applies the reinforced prefix + tier colour via ItemStackMixin; wrapping it again doubles the prefix.
 		return boat.getPickResult().getHoverName();
 	}
 
-	private static void addActionLines(List<Component> lines, List<Integer> colors, ShipyardMode mode, Boat boat, ItemStack held) {
+	private static void addActionLines(List<Component> lines, List<Integer> colors, ShipyardMode mode, AbstractBoat boat, ItemStack held) {
 		if (mode == ShipyardMode.REPAIR) {
 			int cost = ShipyardFunctions.getRepairCost(boat);
 			if (cost <= 0) {

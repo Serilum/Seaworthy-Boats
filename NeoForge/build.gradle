@@ -1,96 +1,68 @@
 plugins {
-    id 'java-library'
-    id 'eclipse'
-    id 'idea'
-    id 'net.neoforged.gradle.userdev' version '7.0.145'
-//    id 'net.neoforged.gradle.mixin' version '7.+'  // mixin
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev'
 }
 
-base {
-    archivesName = "${mod_name}-neoforge-${minecraft_version}"
+repositories {
+    maven { url "https://maven.serilum.com/" }
 }
 
-//mixin { // mixin
-//    config 'collective_neoforge.mixins.json' // mixin
-//} // mixin
-
-/*if (file('src/main/resources/META-INF/accesstransformer.cfg').exists()) {
-    minecraft.accessTransformers.file file('src/main/resources/META-INF/accesstransformer.cfg')
-}*/
-
-runs {
-    configureEach {
-        systemProperty 'forge.logging.markers', 'REGISTRIES'
-        //systemProperty 'mixin.debug.export', 'true'
-        systemProperty 'forge.logging.console.level', 'debug'
-
-        modSource project.sourceSets.main
+neoForge {
+    version = neoforge_version
+    // Automatically enable neoforge AccessTransformers if the file exists
+    def at = project(':Common').file('src/main/resources/META-INF/accesstransformer.cfg')
+    if (at.exists()) {
+        accessTransformers.from(at.absolutePath)
     }
+    runs {
+        configureEach {
+            systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
+            ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
+        }
+        client {
+            client()
+        }
+        data {
+            clientData()
 
-    client {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+            // DataGen can be run by - "./gradlew :neoforge:runData" in Terminal.
+            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+            programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        }
+        server {
+            server()
+        }
     }
-
-    server {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
-    }
-
-    gameTestServer {
-        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-    }
-
-    data {
-        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
     }
 }
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
-    implementation "net.neoforged:neoforge:${neo_version}"
-    compileOnly project(":Common")
-
-    runtimeOnly "com.natamus.collective-ml:collective-neoforge:${minecraft_version}-${collective_version}"
-    compileOnly "com.natamus.collective-ml:collective-neoforge:${minecraft_version}-${collective_version}"
-    compileOnly "com.natamus.collective-ml:collective:${minecraft_version}-${collective_version}"
+    runtimeOnly "com.natamus.collective-ml:collective-neoforge:${minecraft_display_version}-${collective_version}"
+    compileOnly "com.natamus.collective-ml:collective-neoforge:${minecraft_display_version}-${collective_version}"
+    compileOnly "com.natamus.collective-ml:collective:${minecraft_display_version}-${collective_version}"
 }
 
-tasks.named('compileJava', JavaCompile).configure {
-    source(project(":Common").sourceSets.main.allSource)
-}
-//tasks.withType(Javadoc).configureEach {
-//    source(project(":Common").sourceSets.main.allJava)
-//}
-//tasks.named("sourcesJar", Jar) {
-//    from(project(":Common").sourceSets.main.allSource)
-//}
-
-processResources {
-    from project(":Common").sourceSets.main.resources
-}
-
-tasks.withType(ProcessResources).configureEach {
-    var replaceProperties = [
-            minecraft_version   : minecraft_version, minecraft_version_range: "",
-            neo_version         : neo_version, neo_version_range: "",
-            loader_version_range: "",
-            mod_id              : mod_id, mod_name: "", mod_license: "", mod_version: "",
-            mod_authors         : "", mod_description: "", pack_format_number: "",
-    ]
-    inputs.properties replaceProperties
-
-    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
-        expand replaceProperties + [project: project]
+// Implement mcgradleconventions loader attribute
+def loaderAttribute = Attribute.of('io.github.mcgradleconventions.loader', String)
+['apiElements', 'runtimeElements'].each { variant -> // , 'sourcesElements', 'javadocElements'].each { variant ->
+    configurations.named("$variant") {
+        attributes {
+            attribute(loaderAttribute, 'neoforge')
+        }
     }
 }
-
-tasks.withType(JavaCompile).configureEach {
-    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
-}
-
-repositories {
-    maven {
-        url = "https://maven.serilum.com/"
+sourceSets.configureEach {
+    [it.compileClasspathConfigurationName, it.runtimeClasspathConfigurationName, it.getTaskName(null, 'jarJar')].each { variant->
+        configurations.named("$variant") {
+            attributes {
+                attribute(loaderAttribute, 'neoforge')
+            }
+        }
     }
 }

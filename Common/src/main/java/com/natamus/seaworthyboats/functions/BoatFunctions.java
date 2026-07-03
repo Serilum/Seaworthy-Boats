@@ -11,8 +11,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.entity.vehicle.ChestBoat;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
+import net.minecraft.world.entity.vehicle.boat.AbstractChestBoat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
@@ -26,7 +26,7 @@ public class BoatFunctions {
 	private static final Map<UUID, Long> chestPickupArmed = new HashMap<UUID, Long>();
 	private static final long CHEST_PICKUP_WINDOW = 40L;
 
-	public static boolean tryReinforce(Boat boat, Player player, ItemStack stack) {
+	public static boolean tryReinforce(AbstractBoat boat, Player player, ItemStack stack) {
 		int materialTier = BoatTier.getTierForMaterial(stack.getItem());
 		if (materialTier == 0) {
 			return false;
@@ -71,18 +71,18 @@ public class BoatFunctions {
 		}
 	}
 
-	public static boolean tryPickUp(Boat boat, Player player) {
+	public static boolean tryPickUp(AbstractBoat boat, Player player) {
 		Level level = boat.level();
 		if (level.isClientSide()) {
 			return true;
 		}
 
-		if (boat instanceof ChestBoat && !((Container)boat).isEmpty()) {
+		if (boat instanceof AbstractChestBoat && !((Container)boat).isEmpty()) {
 			long now = level.getGameTime();
 			Long armedUntil = chestPickupArmed.get(boat.getUUID());
 			if (armedUntil == null || now > armedUntil) {
 				chestPickupArmed.put(boat.getUUID(), now + CHEST_PICKUP_WINDOW);
-				player.displayClientMessage(Component.translatable("collective.seaworthyboats.message.chestpickupconfirm").withStyle(ChatFormatting.YELLOW), true);
+				player.sendOverlayMessage(Component.translatable("collective.seaworthyboats.message.chestpickupconfirm").withStyle(ChatFormatting.YELLOW));
 				return true;
 			}
 
@@ -92,7 +92,7 @@ public class BoatFunctions {
 		return pickUp(boat, player);
 	}
 
-	public static boolean pickUp(Boat boat, Player player) {
+	public static boolean pickUp(AbstractBoat boat, Player player) {
 		Level level = boat.level();
 		if (level.isClientSide()) {
 			return true;

@@ -2,18 +2,23 @@ package com.natamus.seaworthyboats.functions;
 
 import com.natamus.seaworthyboats.data.BoatTier;
 import com.natamus.seaworthyboats.data.ClientConstants;
+import com.natamus.seaworthyboats.renderer.ILayeredRenderState;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Sheets;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.item.ItemModel;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.world.entity.ItemOwner;
+import net.minecraft.world.item.BoatItem;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 public class BoatRenderFunctions {
 
@@ -24,45 +29,30 @@ public class BoatRenderFunctions {
 	private static final float LIGHT_SHADE = 1.16F;
 	private static final float EDGE_SHADE = 0.62F;
 
-	public static void appendItemTrim(PoseStack poseStack, MultiBufferSource bufferSource, ItemStack stack, int tier, int light, int overlay) {
-		BakedModel trimModel = ClientConstants.trimModelResolver.apply(stack);
-		if (trimModel == null) {
+	public static void appendItemTrim(ItemModelResolver resolver, ModelManager modelManager, ItemStackRenderState output, ItemStack stack, ItemDisplayContext displayContext, Level level, ItemOwner owner, int seed) {
+		if (!(stack.getItem() instanceof BoatItem)) {
 			return;
 		}
 
-		int color = BoatTier.getTierColor(tier);
-		float r = ((color >> 16) & 0xFF) / 255.0F;
-		float g = ((color >> 8) & 0xFF) / 255.0F;
-		float b = (color & 0xFF) / 255.0F;
-
-		VertexConsumer buffer = bufferSource.getBuffer(Sheets.translucentItemSheet());
-
-		// The trim is a flat overlay, so offset it proud of the boat item on both faces. A single offset buries the back face inside the item and the trim only shows on one side.
-		putItemTrimQuads(poseStack, buffer, trimModel, r, g, b, light, overlay, 0.01F);
-		putItemTrimQuads(poseStack, buffer, trimModel, r, g, b, light, overlay, -0.01F);
-	}
-
-	private static void putItemTrimQuads(PoseStack poseStack, VertexConsumer buffer, BakedModel trimModel, float r, float g, float b, int light, int overlay, float zOffset) {
-		poseStack.pushPose();
-		poseStack.translate(0.0F, 0.0F, zOffset);
-
-		PoseStack.Pose pose = poseStack.last();
-		RandomSource random = RandomSource.create();
-		for (Direction dir : Direction.values()) {
-			random.setSeed(42L);
-			for (BakedQuad quad : trimModel.getQuads(null, dir, random)) {
-				buffer.putBulkData(pose, quad, r, g, b, 1.0F, light, overlay);
-			}
-		}
-		random.setSeed(42L);
-		for (BakedQuad quad : trimModel.getQuads(null, null, random)) {
-			buffer.putBulkData(pose, quad, r, g, b, 1.0F, light, overlay);
+		int tier = BoatTier.getTierFromStack(stack);
+		if (tier <= 0) {
+			return;
 		}
 
-		poseStack.popPose();
+		ItemModel trimModel = modelManager.getItemModel(ClientConstants.getTrimModel(stack));
+		ClientLevel clientLevel = level instanceof ClientLevel castLevel ? castLevel : null;
+		trimModel.update(output, stack, resolver, displayContext, clientLevel, owner, seed);
+
+		ItemStackRenderState.LayerRenderState trimLayer = ((ILayeredRenderState)output).seaworthyboats_getLastLayer();
+		if (trimLayer == null) {
+			return;
+		}
+
+		trimLayer.tintLayers().add(BoatTier.getTierColor(tier));
+		output.appendModelIdentityElement(tier);
 	}
 
-	public static void renderTrim(PoseStack poseStack, MultiBufferSource bufferSource, int tier, int light, boolean isRaft, boolean isChest) {
+	public static void renderTrim(PoseStack poseStack, SubmitNodeCollector collector, int tier, int light, boolean isRaft, boolean isChest) {
 		int base = BoatTier.getTierColor(tier);
 		int dark = shade(base, DARK_SHADE);
 		int highlight = shade(base, LIGHT_SHADE);
@@ -80,24 +70,22 @@ public class BoatRenderFunctions {
 
 		poseStack.pushPose();
 		poseStack.scale(0.0625F, 0.0625F, 0.0625F);
-		VertexConsumer buffer = bufferSource.getBuffer(RenderType.textBackground());
-		PoseStack.Pose pose = poseStack.last();
+		collector.submitCustomGeometry(poseStack, RenderTypes.textBackground(), (pose, buffer) -> {
+			topStrip(pose, buffer, topPalette, light, topY, ix, -oz, ox, oz);
+			topStrip(pose, buffer, topPalette, light, topY, -ox, -oz, -ix, oz);
+			topStrip(pose, buffer, topPalette, light, topY, -ix, iz, ix, oz);
+			topStrip(pose, buffer, topPalette, light, topY, -ix, -oz, ix, -iz);
 
-		topStrip(pose, buffer, topPalette, light, topY, ix, -oz, ox, oz);
-		topStrip(pose, buffer, topPalette, light, topY, -ox, -oz, -ix, oz);
-		topStrip(pose, buffer, topPalette, light, topY, -ix, iz, ix, oz);
-		topStrip(pose, buffer, topPalette, light, topY, -ix, -oz, ix, -iz);
+			sideQuad(pose, buffer, edge, light, baseY, topY, -ox, oz, ox, oz);
+			sideQuad(pose, buffer, edge, light, baseY, topY, -ox, -oz, ox, -oz);
+			sideQuad(pose, buffer, edge, light, baseY, topY, ox, -oz, ox, oz);
+			sideQuad(pose, buffer, edge, light, baseY, topY, -ox, -oz, -ox, oz);
 
-		sideQuad(pose, buffer, edge, light, baseY, topY, -ox, oz, ox, oz);
-		sideQuad(pose, buffer, edge, light, baseY, topY, -ox, -oz, ox, -oz);
-		sideQuad(pose, buffer, edge, light, baseY, topY, ox, -oz, ox, oz);
-		sideQuad(pose, buffer, edge, light, baseY, topY, -ox, -oz, -ox, oz);
-
-		sideQuad(pose, buffer, dark, light, baseY, topY, -ix, iz, ix, iz);
-		sideQuad(pose, buffer, dark, light, baseY, topY, -ix, -iz, ix, -iz);
-		sideQuad(pose, buffer, dark, light, baseY, topY, ix, -iz, ix, iz);
-		sideQuad(pose, buffer, dark, light, baseY, topY, -ix, -iz, -ix, iz);
-
+			sideQuad(pose, buffer, dark, light, baseY, topY, -ix, iz, ix, iz);
+			sideQuad(pose, buffer, dark, light, baseY, topY, -ix, -iz, ix, -iz);
+			sideQuad(pose, buffer, dark, light, baseY, topY, ix, -iz, ix, iz);
+			sideQuad(pose, buffer, dark, light, baseY, topY, -ix, -iz, -ix, iz);
+		});
 		poseStack.popPose();
 	}
 
