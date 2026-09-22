@@ -13,7 +13,9 @@ import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -70,7 +72,7 @@ public class BoatRenderFunctions {
 
 		poseStack.pushPose();
 		poseStack.scale(0.0625F, 0.0625F, 0.0625F);
-		collector.submitCustomGeometry(poseStack, RenderTypes.textBackground(), (pose, buffer) -> {
+		collector.submitCustomGeometry(poseStack, RenderTypes.entitySolid(ClientConstants.BOAT_TRIM_TEXTURE), (pose, buffer) -> {
 			topStrip(pose, buffer, topPalette, light, topY, ix, -oz, ox, oz);
 			topStrip(pose, buffer, topPalette, light, topY, -ox, -oz, -ix, oz);
 			topStrip(pose, buffer, topPalette, light, topY, -ix, iz, ix, oz);
@@ -134,30 +136,36 @@ public class BoatRenderFunctions {
 	}
 
 	private static void topQuad(PoseStack.Pose pose, VertexConsumer buffer, int color, int light, float y, float x1, float z1, float x2, float z2) {
-		vertex(pose, buffer, color, light, x1, y, z1);
-		vertex(pose, buffer, color, light, x1, y, z2);
-		vertex(pose, buffer, color, light, x2, y, z2);
-		vertex(pose, buffer, color, light, x2, y, z1);
+		vertex(pose, buffer, color, light, x1, y, z1, 0.0F, 1.0F, 0.0F);
+		vertex(pose, buffer, color, light, x1, y, z2, 0.0F, 1.0F, 0.0F);
+		vertex(pose, buffer, color, light, x2, y, z2, 0.0F, 1.0F, 0.0F);
+		vertex(pose, buffer, color, light, x2, y, z1, 0.0F, 1.0F, 0.0F);
 
-		vertex(pose, buffer, color, light, x2, y, z1);
-		vertex(pose, buffer, color, light, x2, y, z2);
-		vertex(pose, buffer, color, light, x1, y, z2);
-		vertex(pose, buffer, color, light, x1, y, z1);
+		vertex(pose, buffer, color, light, x2, y, z1, 0.0F, -1.0F, 0.0F);
+		vertex(pose, buffer, color, light, x2, y, z2, 0.0F, -1.0F, 0.0F);
+		vertex(pose, buffer, color, light, x1, y, z2, 0.0F, -1.0F, 0.0F);
+		vertex(pose, buffer, color, light, x1, y, z1, 0.0F, -1.0F, 0.0F);
 	}
 
 	private static void sideQuad(PoseStack.Pose pose, VertexConsumer buffer, int color, int light, float baseY, float topY, float x1, float z1, float x2, float z2) {
-		vertex(pose, buffer, color, light, x1, baseY, z1);
-		vertex(pose, buffer, color, light, x2, baseY, z2);
-		vertex(pose, buffer, color, light, x2, topY, z2);
-		vertex(pose, buffer, color, light, x1, topY, z1);
+		float spanX = x2 - x1;
+		float spanZ = z2 - z1;
+		float span = Mth.sqrt(spanX * spanX + spanZ * spanZ);
+		float nx = spanZ / span;
+		float nz = -spanX / span;
 
-		vertex(pose, buffer, color, light, x1, topY, z1);
-		vertex(pose, buffer, color, light, x2, topY, z2);
-		vertex(pose, buffer, color, light, x2, baseY, z2);
-		vertex(pose, buffer, color, light, x1, baseY, z1);
+		vertex(pose, buffer, color, light, x1, baseY, z1, nx, 0.0F, nz);
+		vertex(pose, buffer, color, light, x2, baseY, z2, nx, 0.0F, nz);
+		vertex(pose, buffer, color, light, x2, topY, z2, nx, 0.0F, nz);
+		vertex(pose, buffer, color, light, x1, topY, z1, nx, 0.0F, nz);
+
+		vertex(pose, buffer, color, light, x1, topY, z1, -nx, 0.0F, -nz);
+		vertex(pose, buffer, color, light, x2, topY, z2, -nx, 0.0F, -nz);
+		vertex(pose, buffer, color, light, x2, baseY, z2, -nx, 0.0F, -nz);
+		vertex(pose, buffer, color, light, x1, baseY, z1, -nx, 0.0F, -nz);
 	}
 
-	private static void vertex(PoseStack.Pose pose, VertexConsumer buffer, int color, int light, float x, float y, float z) {
-		buffer.addVertex(pose, x, y, z).setColor(color).setLight(light);
+	private static void vertex(PoseStack.Pose pose, VertexConsumer buffer, int color, int light, float x, float y, float z, float nx, float ny, float nz) {
+		buffer.addVertex(pose, x, y, z).setColor(color).setUv(0.5F, 0.5F).setOverlay(OverlayTexture.NO_OVERLAY).setLight(light).setNormal(pose, nx, ny, nz);
 	}
 }

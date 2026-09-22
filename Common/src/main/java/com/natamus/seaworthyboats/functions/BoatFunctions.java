@@ -11,6 +11,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
 import net.minecraft.world.entity.vehicle.boat.AbstractChestBoat;
 import net.minecraft.world.item.ItemStack;
@@ -104,7 +105,7 @@ public class BoatFunctions {
 		}
 
 		if (!player.addItem(stack)) {
-			player.drop(stack, false);
+			player.drop(stack, false, Prediction.PREDICTED);
 		}
 
 		boat.discard();

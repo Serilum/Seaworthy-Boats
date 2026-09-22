@@ -20,6 +20,8 @@ public class ClientConstants {
 	public static final Identifier CHEST_BOAT_TRIM_MODEL = Identifier.fromNamespaceAndPath(Reference.MOD_ID, "chest_boat_trim");
 	public static final Identifier CHEST_RAFT_TRIM_MODEL = Identifier.fromNamespaceAndPath(Reference.MOD_ID, "chest_raft_trim");
 
+	public static final Identifier BOAT_TRIM_TEXTURE = Identifier.fromNamespaceAndPath(Reference.MOD_ID, "textures/entity/boat_trim.png");
+
 	public static AbstractBoat highlightedBoat;
 
 	public static Identifier getTrimModel(ItemStack stack) {
