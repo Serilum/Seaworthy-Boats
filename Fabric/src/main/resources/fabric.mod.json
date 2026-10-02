@@ -1,22 +1,22 @@
 {
   "schemaVersion": 1,
   "id": "seaworthyboats",
-  "version": "1.0",
+  "version": "1.1",
 
   "name": "Seaworthy Boats",
   "description": "Reinforce boats into faster, tougher tiers from copper to netherite, and repair them with planks at a shipyard.",
-  "authors": [ "Rick South" ],
+  "authors": [ "Serilum" ],
   "contact": {
     "homepage": "https://serilum.com/mod/seaworthy-boats",
     "sources": "https://github.com/Serilum/Seaworthy-Boats",
     "issues": "https://github.com/Serilum/.issue-tracker/labels/Mod:%20Seaworthy%20Boats"
   },
 
-  "license": "All Right Reserved",
+  "license": "All Rights Reserved",
   "icon": "icon.png",
 
   "environment": "*",
-  "entrypoints": { "main": [ "com.natamus.seaworthyboats.ModFabric" ], "client": [ "com.natamus.seaworthyboats.ModFabricClient" ], "modmenu": [ "com.natamus.seaworthyboats.fabric.config.IntegrateModMenu" ] },
+  "entrypoints": { "main": [ "com.serilum.seaworthyboats.ModFabric" ], "client": [ "com.serilum.seaworthyboats.ModFabricClient" ], "modmenu": [ "com.serilum.seaworthyboats.fabric.config.IntegrateModMenu" ] },
   "mixins": [ "seaworthyboats.mixins.json" ],
 
   "depends": {
@@ -24,13 +24,13 @@
     "fabric": "*",
     "minecraft": ">=1.20",
     "java": ">=17",
-    "collective": ">=8.39"
+    "collective": ">=8.40"
   },
 
   "custom": {
     "modmenu": {
       "links": {
-        "Donate <3" : "https://ricksouth.com/donate"
+        "Donate <3" : "https://serilum.com/donate"
       }
     }
   },
@@ -39,14 +39,13 @@
 	  " ",
 	  "Thank you very much to my Membership sponsors for supporting the development of this mod!",
 	  " ",
-	  "If you would like to contribute too, check out https://serilum.com/donate.",
+	  "If you would like to contribute too, check out https://serilum.com/donate",
 	  " ",
 	  "Membership sponsors:",
 	  " Andrean Olgo",
 	  " AnyankaT",
 	  " aternosorg",
 	  " Cherriesaurus",
-	  " Josh",
 	  " Linda Jansen",
 	  " MWS",
 	  " Tyler Behl"
