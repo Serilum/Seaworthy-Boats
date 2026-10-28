@@ -1,10 +1,12 @@
 package com.serilum.seaworthyboats.mixin;
 
 import com.serilum.seaworthyboats.config.ConfigHandler;
+
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.AbstractBoat;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,13 +15,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = Gui.class, priority = 1001)
 public class GuiMixin {
 
-	@Inject(method = "renderFood(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/entity/player/Player;II)V", at = @At("HEAD"), cancellable = true)
-	public void renderFood(GuiGraphics guiGraphics, Player player, int x, int y, CallbackInfo ci) {
+	@Inject(method = "extractFood", at = @At(value = "HEAD"), cancellable = true)
+	public void extractFood(GuiGraphicsExtractor graphics, Player player, int x, int y, CallbackInfo ci) {
 		if (!ConfigHandler.showBoatHealthBar) {
 			return;
 		}
 
-		if (player.getVehicle() instanceof Boat) {
+		// Hide health bar when in a boat, similar to riding horses
+		if (player.getVehicle() instanceof AbstractBoat) {
 			ci.cancel();
 		}
 	}

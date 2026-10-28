@@ -1,26 +1,17 @@
 {
 	"type": "minecraft:crafting_shaped",
+	"key": {
+		"C": "minecraft:iron_chain",
+		"S": "minecraft:string",
+		"I": "minecraft:iron_ingot",
+		"P": "#minecraft:planks"
+	},
 	"pattern": [
 		"PCP",
 		"SIS",
 		"PPP"
 	],
-	"key": {
-		"C": {
-			"item": "minecraft:chain"
-		},
-		"S": {
-			"item": "minecraft:string"
-		},
-		"I": {
-			"item": "minecraft:iron_ingot"
-		},
-		"P": {
-			"tag": "minecraft:planks"
-		}
-	},
 	"result": {
-		"id": "seaworthyboats:shipyard",
-		"count": 1
+		"id": "seaworthyboats:shipyard"
 	}
 }

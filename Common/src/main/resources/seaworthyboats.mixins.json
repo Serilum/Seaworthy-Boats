@@ -4,21 +4,23 @@
   "package": "com.serilum.seaworthyboats.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "AbstractBoatMixin",
     "BoatItemMixin",
-    "BoatMixin",
-    "ChestBoatMixin",
-    "ItemBarMixin",
+    "ItemMixin",
     "ItemStackMixin",
     "VehicleEntityMixin"
   ],
   "client": [
-    "BoatModelMixin",
-    "BoatRendererMixin",
+    "AbstractBoatModelMixin",
+    "AbstractBoatRendererMixin",
+    "BoatRenderStateMixin",
     "GuiMixin",
-    "ItemRendererMixin",
-	  "MinecraftMixin"
+    "ItemModelResolverMixin",
+    "ItemStackRenderStateMixin",
+    "MinecraftMixin"
   ],
   "server": [
+
   ],
   "injectors": {
     "defaultRequire": 1
