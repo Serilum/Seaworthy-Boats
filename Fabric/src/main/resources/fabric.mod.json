@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "seaworthyboats",
-  "version": "1.1",
+  "version": "2.0",
 
   "name": "Seaworthy Boats",
   "description": "Reinforce boats into faster, tougher tiers from copper to netherite, and repair them with planks at a shipyard.",
@@ -24,13 +24,13 @@
     "fabric": "*",
     "minecraft": ">=1.20",
     "java": ">=17",
-    "collective": ">=8.40"
+    "collective": ">=8.85"
   },
 
   "custom": {
     "modmenu": {
       "links": {
-        "Donate <3" : "https://serilum.com/donate"
+        "❤ Patreon" : "https://link.serilum.com/patreon"
       }
     }
   },
@@ -42,8 +42,6 @@
 	  "If you would like to contribute too, check out https://serilum.com/donate",
 	  " ",
 	  "Membership sponsors:",
-	  " Andrean Olgo",
-	  " AnyankaT",
 	  " aternosorg",
 	  " Cherriesaurus",
 	  " Linda Jansen",

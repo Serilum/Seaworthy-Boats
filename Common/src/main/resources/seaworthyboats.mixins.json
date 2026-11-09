@@ -7,7 +7,7 @@
     "BoatItemMixin",
     "BoatMixin",
     "ChestBoatMixin",
-    "ItemBarMixin",
+    "ItemMixin",
     "ItemStackMixin"
   ],
   "client": [

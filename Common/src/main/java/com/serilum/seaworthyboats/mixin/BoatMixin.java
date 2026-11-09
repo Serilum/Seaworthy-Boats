@@ -3,9 +3,7 @@ package com.serilum.seaworthyboats.mixin;
 import com.serilum.seaworthyboats.config.ConfigHandler;
 import com.serilum.seaworthyboats.data.BoatTier;
 import com.serilum.seaworthyboats.functions.BoatFunctions;
-import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
@@ -50,16 +48,23 @@ public class BoatMixin {
 	}
 
 	@Inject(method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", at = @At("HEAD"), cancellable = true)
-	public void hurt_disablePlayerDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-		if (!ConfigHandler.disablePlayerBoatDamage) {
-			return;
-		}
-
+	public void hurt_playerHit(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		if (!(source.getEntity() instanceof Player player)) {
 			return;
 		}
 
-		player.displayClientMessage(Component.translatable("collective.seaworthyboats.message.pickuphint").withStyle(ChatFormatting.YELLOW), true);
+		Boat boat = (Boat)(Object)this;
+		if (source.getDirectEntity() == player && BoatFunctions.canCrouchHitToPickUp(player)) {
+			BoatFunctions.tryPickUp(boat, player);
+			cir.setReturnValue(false);
+			return;
+		}
+
+		if (!ConfigHandler.disablePlayerBoatDamage) {
+			return;
+		}
+
+		BoatFunctions.sendPickupHint(player);
 		cir.setReturnValue(false);
 	}
 
@@ -82,6 +87,10 @@ public class BoatMixin {
 
 	@Inject(method = "interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;", at = @At("HEAD"), cancellable = true)
 	public void interact(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+		if (!ConfigHandler.crouchRightClickPicksUpBoats) {
+			return;
+		}
+
 		Boat boat = (Boat)(Object)this;
 
 		if (hand == InteractionHand.MAIN_HAND && player.isShiftKeyDown() && player.getItemInHand(hand).isEmpty()) {

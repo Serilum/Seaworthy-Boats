@@ -29,6 +29,7 @@ public class ShipyardBlock extends Block {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
 		ItemStack itemStack = player.getItemInHand(hand);
 		if (player.isShiftKeyDown()) {

@@ -2,12 +2,10 @@ package com.serilum.seaworthyboats.mixin;
 
 import com.serilum.seaworthyboats.config.ConfigHandler;
 import com.serilum.seaworthyboats.data.BoatTier;
-
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.BoatItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = Item.class, priority = 1001)
-public class ItemBarMixin {
+public class ItemMixin {
 
 	@Inject(method = "isBarVisible", at = @At("HEAD"), cancellable = true)
 	public void isBarVisible(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {

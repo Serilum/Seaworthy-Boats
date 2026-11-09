@@ -42,6 +42,7 @@ public class BoatRenderFunctions {
 		putItemTrimQuads(poseStack, buffer, trimModel, r, g, b, light, overlay, -0.01F);
 	}
 
+	@SuppressWarnings("deprecation")
 	private static void putItemTrimQuads(PoseStack poseStack, VertexConsumer buffer, BakedModel trimModel, float r, float g, float b, int light, int overlay, float zOffset) {
 		poseStack.pushPose();
 		poseStack.translate(0.0F, 0.0F, zOffset);

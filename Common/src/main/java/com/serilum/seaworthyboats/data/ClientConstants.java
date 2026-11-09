@@ -5,7 +5,7 @@ import com.serilum.seaworthyboats.util.Reference;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ItemStack;
 
@@ -28,7 +28,7 @@ public class ClientConstants {
 		Minecraft.getInstance().getModelManager().getModel(new ModelResourceLocation(Reference.MOD_ID, getTrimName(stack), "inventory"));
 
 	public static String getTrimName(ItemStack stack) {
-		String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+		String path = Minecraft.getInstance().level.registryAccess().registryOrThrow(Registries.ITEM).getKey(stack.getItem()).getPath();
 		boolean hasChest = path.contains("chest");
 		boolean isRaft = path.contains("raft");
 

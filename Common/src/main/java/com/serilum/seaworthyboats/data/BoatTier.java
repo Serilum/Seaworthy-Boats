@@ -103,7 +103,7 @@ public class BoatTier {
 			case 3 -> { return ConfigHandler.ironSpeed; }
 			case 4 -> { return ConfigHandler.diamondSpeed; }
 			case 5 -> { return ConfigHandler.netheriteSpeed; }
-			default -> { return 1.0; }
+			default -> { return ConfigHandler.unreinforcedSpeed; }
 		}
 	}
 
