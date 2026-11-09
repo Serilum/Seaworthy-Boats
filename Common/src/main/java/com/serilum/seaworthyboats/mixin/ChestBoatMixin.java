@@ -1,5 +1,6 @@
 package com.serilum.seaworthyboats.mixin;
 
+import com.serilum.seaworthyboats.config.ConfigHandler;
 import com.serilum.seaworthyboats.functions.BoatFunctions;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -15,6 +16,10 @@ public class ChestBoatMixin {
 
 	@Inject(method = "interact(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;", at = @At("HEAD"), cancellable = true)
 	public void interact(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+		if (!ConfigHandler.crouchRightClickPicksUpBoats) {
+			return;
+		}
+
 		ChestBoat boat = (ChestBoat)(Object)this;
 
 		if (hand == InteractionHand.MAIN_HAND && player.isShiftKeyDown() && player.getItemInHand(hand).isEmpty()) {

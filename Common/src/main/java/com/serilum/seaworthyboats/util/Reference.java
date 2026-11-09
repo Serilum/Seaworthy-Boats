@@ -3,6 +3,6 @@ package com.serilum.seaworthyboats.util;
 public class Reference {
 	public static final String MOD_ID = "seaworthyboats";
 	public static final String NAME = "Seaworthy Boats";
-	public static final String VERSION = "1.1";
+	public static final String VERSION = "2.0";
 	public static final String ACCEPTED_VERSIONS = "[1.21.1]";
 }

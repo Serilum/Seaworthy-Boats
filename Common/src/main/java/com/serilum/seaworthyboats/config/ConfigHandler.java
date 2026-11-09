@@ -1,6 +1,7 @@
 package com.serilum.seaworthyboats.config;
 
 import com.natamus.collective.config.DuskConfig;
+import com.natamus.collective.services.Services;
 import com.serilum.seaworthyboats.util.Reference;
 
 import java.util.Arrays;
@@ -11,31 +12,40 @@ public class ConfigHandler extends DuskConfig {
 	public static HashMap<String, List<String>> configMetaData = new HashMap<String, List<String>>();
 
 	@Entry public static boolean disablePlayerBoatDamage = true;
+	@Entry(sync = true) public static boolean crouchRightClickPicksUpBoats = true;
+	@Entry(sync = true) public static boolean crouchHitPicksUpBoats = false;
 
 	@Entry public static boolean showBoatHealthBar = true;
-	@Entry(min = 1, max = 1000) public static int boatMaxHealth = 20;
-	@Entry(min = 1, max = 100) public static int healthPerPlank = 2;
+	@Entry(min = 1, max = 1000, sync = true) public static int boatMaxHealth = 20;
+	@Entry(min = 1, max = 100, sync = true) public static int healthPerPlank = 2;
 
-	@Entry(min = 1, max = 16) public static int shipyardRange = 4;
+	@Entry(min = 1, max = 16, sync = true) public static int shipyardRange = 4;
 	@Entry(min = 0, max = 1000) public static int shipyardInfoYOffset = 8;
 
-	@Entry public static boolean sequentialUpgrades = true;
-	@Entry(min = 1, max = 64) public static int materialsPerUpgrade = 8;
-	@Entry(min = 0, max = 1.0) public static double copperArmour = 0.07;
-	@Entry(min = 0, max = 1.0) public static double goldArmour = 0.10;
-	@Entry(min = 0, max = 1.0) public static double ironArmour = 0.25;
-	@Entry(min = 0, max = 1.0) public static double diamondArmour = 0.40;
-	@Entry(min = 0, max = 1.0) public static double netheriteArmour = 0.80;
+	@Entry(sync = true) public static boolean sequentialUpgrades = true;
+	@Entry(min = 1, max = 64, sync = true) public static int materialsPerUpgrade = 8;
+	@Entry(min = 0, max = 1.0, sync = true) public static double copperArmour = 0.07;
+	@Entry(min = 0, max = 1.0, sync = true) public static double goldArmour = 0.10;
+	@Entry(min = 0, max = 1.0, sync = true) public static double ironArmour = 0.25;
+	@Entry(min = 0, max = 1.0, sync = true) public static double diamondArmour = 0.40;
+	@Entry(min = 0, max = 1.0, sync = true) public static double netheriteArmour = 0.80;
 
-	@Entry(min = 0.1, max = 20.0) public static double copperSpeed = 1.10;
-	@Entry(min = 0.1, max = 20.0) public static double goldSpeed = 1.20;
-	@Entry(min = 0.1, max = 20.0) public static double ironSpeed = 1.35;
-	@Entry(min = 0.1, max = 20.0) public static double diamondSpeed = 1.55;
-	@Entry(min = 0.1, max = 20.0) public static double netheriteSpeed = 1.80;
+	@Entry(min = 0.1, max = 20.0, sync = true) public static double unreinforcedSpeed = 1.00;
+	@Entry(min = 0.1, max = 20.0, sync = true) public static double copperSpeed = 1.10;
+	@Entry(min = 0.1, max = 20.0, sync = true) public static double goldSpeed = 1.20;
+	@Entry(min = 0.1, max = 20.0, sync = true) public static double ironSpeed = 1.35;
+	@Entry(min = 0.1, max = 20.0, sync = true) public static double diamondSpeed = 1.55;
+	@Entry(min = 0.1, max = 20.0, sync = true) public static double netheriteSpeed = 1.80;
 
 	public static void initConfig() {
 		configMetaData.put("disablePlayerBoatDamage", Arrays.asList(
-			"Whether a player's own hits deal no damage to boats. When on, hitting a boat tells you to sneak and right-click empty-handed to pick it up instead. Mobs and other sources still damage boats."
+			"Whether a player's own hits deal no damage to boats. Mobs and other sources still damage boats."
+		));
+		configMetaData.put("crouchRightClickPicksUpBoats", Arrays.asList(
+			"Whether crouching and right-clicking a boat with an empty hand picks it up."
+		));
+		configMetaData.put("crouchHitPicksUpBoats", Arrays.asList(
+			"Whether crouching and hitting a boat with an empty hand picks it up. Enabled by default when Move Boats is installed, which uses crouch right-click itself."
 		));
 
 		configMetaData.put("showBoatHealthBar", Arrays.asList(
@@ -77,6 +87,9 @@ public class ConfigHandler extends DuskConfig {
 			"How much incoming damage a netherite-reinforced boat ignores. 0.0 is no protection, 1.0 is full immunity."
 		));
 
+		configMetaData.put("unreinforcedSpeed", Arrays.asList(
+			"Forward speed multiplier for a boat that is not reinforced. 1.0 is vanilla boat speed, 0.5 is half as fast."
+		));
 		configMetaData.put("copperSpeed", Arrays.asList(
 			"Forward speed multiplier for a copper-reinforced boat. 1.0 is vanilla boat speed, 1.5 is fifty percent faster."
 		));
@@ -95,5 +108,9 @@ public class ConfigHandler extends DuskConfig {
 
 
 		DuskConfig.init(Reference.NAME, Reference.MOD_ID, ConfigHandler.class);
+
+		if (Services.MODLOADER.isModLoaded("moveboats")) {
+			DuskConfig.setInitialValue(Reference.MOD_ID, "crouchHitPicksUpBoats", true);
+		}
 	}
 }

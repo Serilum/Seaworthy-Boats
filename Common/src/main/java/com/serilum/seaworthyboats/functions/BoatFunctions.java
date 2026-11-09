@@ -92,6 +92,19 @@ public class BoatFunctions {
 		return pickUp(boat, player);
 	}
 
+	public static boolean canCrouchHitToPickUp(Player player) {
+		return ConfigHandler.crouchHitPicksUpBoats && player.isShiftKeyDown() && player.getMainHandItem().isEmpty();
+	}
+
+	public static void sendPickupHint(Player player) {
+		if (ConfigHandler.crouchHitPicksUpBoats) {
+			player.displayClientMessage(Component.translatable("collective.seaworthyboats.message.crouchhitpickuphint").withStyle(ChatFormatting.YELLOW), true);
+		}
+		else if (ConfigHandler.crouchRightClickPicksUpBoats) {
+			player.displayClientMessage(Component.translatable("collective.seaworthyboats.message.pickuphint").withStyle(ChatFormatting.YELLOW), true);
+		}
+	}
+
 	public static boolean pickUp(Boat boat, Player player) {
 		Level level = boat.level();
 		if (level.isClientSide()) {
