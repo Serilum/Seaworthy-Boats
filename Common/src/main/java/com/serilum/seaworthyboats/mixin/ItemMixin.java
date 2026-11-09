@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = Item.class, priority = 1001)
-public class ItemBarMixin {
+public class ItemMixin {
 
 	@Inject(method = "isBarVisible", at = @At("HEAD"), cancellable = true)
 	public void isBarVisible(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {

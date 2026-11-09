@@ -1,5 +1,6 @@
 package com.serilum.seaworthyboats.mixin;
 
+import com.serilum.seaworthyboats.config.ConfigHandler;
 import com.serilum.seaworthyboats.data.BoatTier;
 import com.serilum.seaworthyboats.functions.BoatFunctions;
 import net.minecraft.world.InteractionHand;
@@ -14,17 +15,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = AbstractBoat.class, priority = 1001)
 public class AbstractBoatMixin {
 
-	@Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/boat/AbstractBoat;setDamage(F)V"))
-	public void tick_disableHealthRecovery(AbstractBoat boat, float damage) {
-		// Disable tick recovery
+	@ModifyArg(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/vehicle/boat/AbstractBoat;setDamage(F)V"))
+	public float tick_disableHealthRecovery(float recoveredDamage) {
+		return ((AbstractBoat)(Object)this).getDamage();
 	}
 
 	@ModifyConstant(method = "controlBoat", constant = @Constant(floatValue = 0.04F))
@@ -35,6 +36,10 @@ public class AbstractBoatMixin {
 
 	@Inject(method = "interact", at = @At("HEAD"), cancellable = true)
 	public void interact(Player player, InteractionHand hand, Vec3 location, CallbackInfoReturnable<InteractionResult> cir) {
+		if (!ConfigHandler.crouchRightClickPicksUpBoats) {
+			return;
+		}
+
 		AbstractBoat boat = (AbstractBoat)(Object)this;
 
 		if (hand == InteractionHand.MAIN_HAND && player.isShiftKeyDown() && player.getItemInHand(hand).isEmpty()) {

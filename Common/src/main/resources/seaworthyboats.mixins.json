@@ -6,7 +6,7 @@
   "mixins": [
     "AbstractBoatMixin",
     "BoatItemMixin",
-    "ItemBarMixin",
+    "ItemMixin",
     "ItemStackMixin",
     "VehicleEntityMixin"
   ],

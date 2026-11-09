@@ -2,8 +2,7 @@ package com.serilum.seaworthyboats.mixin;
 
 import com.serilum.seaworthyboats.config.ConfigHandler;
 import com.serilum.seaworthyboats.data.BoatTier;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
+import com.serilum.seaworthyboats.functions.BoatFunctions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.player.Player;
@@ -54,12 +53,8 @@ public class VehicleEntityMixin {
 	}
 
 	@Inject(method = "hurtServer", at = @At("HEAD"), cancellable = true)
-	public void hurtServer_disablePlayerDamage(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-		if (!ConfigHandler.disablePlayerBoatDamage) {
-			return;
-		}
-
-		if (!((VehicleEntity)(Object)this instanceof AbstractBoat)) {
+	public void hurtServer_playerHit(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+		if (!((VehicleEntity)(Object)this instanceof AbstractBoat boat)) {
 			return;
 		}
 
@@ -67,7 +62,17 @@ public class VehicleEntityMixin {
 			return;
 		}
 
-		player.sendOverlayMessage(Component.translatable("collective.seaworthyboats.message.pickuphint").withStyle(ChatFormatting.YELLOW));
+		if (source.getDirectEntity() == player && BoatFunctions.canCrouchHitToPickUp(player)) {
+			BoatFunctions.tryPickUp(boat, player);
+			cir.setReturnValue(false);
+			return;
+		}
+
+		if (!ConfigHandler.disablePlayerBoatDamage) {
+			return;
+		}
+
+		BoatFunctions.sendPickupHint(player);
 		cir.setReturnValue(false);
 	}
 }
